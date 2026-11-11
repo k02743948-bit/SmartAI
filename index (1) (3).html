@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SmartAI – Next-Gen Personal AI Super Assistant</title>
+    <meta name="description" content="One AI. Endless Possibilities. Complete standalone single-file AI assistant platform." />
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN with configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+              mono: ['"JetBrains Mono"', 'monospace'],
+            },
+            colors: {
+              midnight: '#070913',
+              cardbg: 'rgba(15, 23, 42, 0.7)',
+            }
+          }
+        }
+      }
+    </script>
+
+    <!-- Canvas Confetti for Celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+
+    <!-- React 18 & Babel Standalone for single-file browser execution -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone@7.24.0/babel.min.js"></script>
+
+    <style>
+      body {
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        background-color: #070913;
+        color: #f1f5f9;
+        overflow-x: hidden;
+      }
+      .glass-panel {
+        background: rgba(13, 18, 38, 0.72);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .glass-panel-light {
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+      }
+      ::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(148, 163, 184, 0.2);
+        border-radius: 9999px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(148, 163, 184, 0.4);
+      }
+      @keyframes spin-slow {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .animate-spin-slow {
+        animation: spin-slow 18s linear infinite;
+      }
+      @keyframes pulse-subtle {
+        0%, 100% { opacity: 0.75; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.04); }
+      }
+      .animate-pulse-subtle {
+        animation: pulse-subtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+    </style>
+  </head>
+  <body class="bg-[#070913] text-slate-100 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+    <div id="root"></div>
+
+    <!-- Complete SmartAI Single-File Application Source -->
+    <script type="text/babel">
+      const { useState, useEffect, useRef, useMemo, createContext, useContext } = React;
+
+      // ==========================================
+      // ICON HELPERS (Pure Inline SVGs - No npm required)
+      // ==========================================
+      const Icon = ({ name, className = "w-4 h-4", ...props }) => {
+        const icons = {
+          Sparkles: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+              <path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/>
+            </svg>
+          ),
+          MessageSquare: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+            </svg>
+          ),
+          Mic: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+          ),
+          MicOff: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <line x1="2" x2="22" y1="2" y2="22"/><path d="M18.89 13.23A7.12 7.12 0 0 0 19 12v-2"/><path d="M5 10v2a7 7 0 0 0 12 5"/><path d="M15 9.34V5a3 3 0 0 0-5.68-1.33"/><path d="M9 9v3a3 3 0 0 0 5.12 2.12"/><line x1="12" x2="12" y1="19" y2="22"/>
+            </svg>
+          ),
+          PenTool: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="m12 19 7-7 3 3-7 7-3-3z"/><path d="m18 13-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><circle cx="11" cy="11" r="2"/>
+            </svg>
+          ),
+          Languages: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="m5 8 6 6"/><path d="m4 14 6-6 2-3"/><path d="M2 5h12"/><path d="M7 2h1"/><path d="m22 22-5-10-5 10"/><path d="M14 18h6"/>
+            </svg>
+          ),
+          Code: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+            </svg>
+          ),
+          GraduationCap: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>
+            </svg>
+          ),
+          FileText: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>
+            </svg>
+          ),
+          Layers: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.57 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m2 12 8.57 3.91a2 2 0 0 0 1.66 0L22 12"/><path d="m2 17 8.57 3.91a2 2 0 0 0 1.66 0L22 17"/>
+            </svg>
+          ),
+          BrainCircuit: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M12 5v14"/>
+            </svg>
+          ),
+          BookOpen: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+            </svg>
+          ),
+          CreditCard: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/>
+            </svg>
+          ),
+          ShieldCheck: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>
+            </svg>
+          ),
+          Settings: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          ),
+          Send: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>
+            </svg>
+          ),
+          Copy: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+            </svg>
+          ),
+          Check: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M20 6 9 17l-5-5"/>
+            </svg>
+          ),
+          Trash2: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>
+            </svg>
+          ),
+          Sun: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/>
+            </svg>
+          ),
+          Moon: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
+            </svg>
+          ),
+          Volume2: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+            </svg>
+          ),
+          VolumeX: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="22" x2="16" y1="9" y2="15"/><line x1="16" x2="22" y1="9" y2="15"/>
+            </svg>
+          ),
+          Download: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>
+            </svg>
+          ),
+          Plus: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <path d="M5 12h14"/><path d="M12 5v14"/>
+            </svg>
+          ),
+          Zap: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+            </svg>
+          ),
+          LayoutDashboard: (
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} {...props}>
+              <rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/>
+            </svg>
+          ),
+        };
+        return icons[name] || <span className="inline-block w-4 h-4 bg-slate-500 rounded-full" />;
+      };
+
+      // ==========================================
+      // ABSTRACT GLOWING INTELLIGENCE LOGO
+      // ==========================================
+      const Logo = ({ size = "md", showText = true }) => {
+        return (
+          <div className="flex items-center gap-3 select-none">
+            <div className="relative flex items-center justify-center w-9 h-9">
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-500 blur-[8px] opacity-75 animate-pulse-subtle" />
+              <div className="relative w-full h-full rounded-xl bg-[#090d1f] border border-cyan-400/40 p-1.5 flex items-center justify-center shadow-lg">
+                <svg viewBox="0 0 40 40" fill="none" className="w-full h-full">
+                  <circle cx="20" cy="20" r="16" stroke="#38bdf8" strokeWidth="1.8" strokeDasharray="5 3" className="animate-spin-slow opacity-80" />
+                  <circle cx="20" cy="20" r="11" stroke="#ec4899" strokeWidth="2" strokeOpacity="0.85" />
+                  <path d="M20 7L23.5 16.5L33 20L23.5 23.5L20 33L16.5 23.5L7 20L16.5 16.5L20 7Z" fill="url(#logo-grad)" />
+                  <circle cx="20" cy="20" r="3" fill="#ffffff" />
+                  <defs>
+                    <linearGradient id="logo-grad" x1="0" y1="0" x2="40" y2="40">
+                      <stop stopColor="#38bdf8" />
+                      <stop offset="0.5" stopColor="#818cf8" />
+                      <stop offset="1" stopColor="#c084fc" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </div>
+            </div>
+            {showText && (
+              <div className="flex flex-col">
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-xl tracking-tight text-white">
+                    Smart<span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-fuchsia-400">AI</span>
+                  </span>
+                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    v2.5
+                  </span>
+                </div>
+                <span className="text-[10px] font-medium text-slate-400">One AI. Endless Possibilities.</span>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // ==========================================
+      // MOCK DATA & CONFIG
+      // ==========================================
+      const SMART_MODES = {
+        personal: { id: 'personal', name: 'Personal Assistant', desc: 'Proactive everyday productivity, organizing tasks', color: 'from-blue-500 to-indigo-600', badge: 'bg-blue-500/10 text-blue-400 border-blue-500/20' },
+        study: { id: 'study', name: 'Study & Tutor', desc: 'Socratic reasoning, concept breakdowns, test prep & quizzes', color: 'from-emerald-500 to-teal-600', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
+        business: { id: 'business', name: 'Business Executive', desc: 'Strategic analysis, ROI calculations, executive memos', color: 'from-amber-500 to-orange-600', badge: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
+        creator: { id: 'creator', name: 'Creative Studio', desc: 'Viral hooks, compelling storytelling & brand strategy', color: 'from-purple-500 to-pink-600', badge: 'bg-purple-500/10 text-purple-400 border-purple-500/20' },
+        developer: { id: 'developer', name: 'Developer Mode', desc: 'Clean modular code, debugging & algorithm complexity', color: 'from-cyan-500 to-blue-600', badge: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20' }
+      };
+
+      const INITIAL_MEMORIES = [
+        { id: 'm-1', content: 'Prefers TypeScript code with strict typing and functional paradigms', category: 'coding', isEnabled: true },
+        { id: 'm-2', content: 'Building a next-generation SaaS startup focused on developer productivity', category: 'work', isEnabled: true },
+        { id: 'm-3', content: 'Prefers concise executive summaries followed by bulleted action items', category: 'preference', isEnabled: true },
+        { id: 'm-4', content: 'Studying machine learning architectures (Transformers & Diffusion models)', category: 'study', isEnabled: true },
+      ];
+
+      const PROMPT_TEMPLATES = [
+        { id: 'p-1', title: 'Explain Like I am 12', prompt: 'Explain the core principles of quantum entanglement using everyday analogies that a 12-year-old would immediately understand.', cat: 'Students', mode: 'study' },
+        { id: 'p-2', title: 'Executive Pitch Teaser', prompt: 'Help me draft a crisp 60-second elevator pitch for an AI copilot for supply chain logistics. Structure it: Problem, Secret Insight, Solution, Traction, Ask.', cat: 'Business', mode: 'business' },
+        { id: 'p-3', title: 'High-Performance Refactor', prompt: 'Review this algorithm for Big-O time and space bottlenecks. Propose a modern TypeScript refactor that achieves O(n) linear performance with memoization.', cat: 'Developers', mode: 'developer' },
+        { id: 'p-4', title: 'Viral Hook Generator', prompt: 'Generate 10 scroll-stopping opening hooks for a post about how AI is revolutionizing solo indie entrepreneurs in 2026. Make them high-curiosity.', cat: 'Creators', mode: 'creator' },
+        { id: 'p-5', title: 'Daily Priority Quadrant', prompt: 'Here is my messy list of 12 tasks for today. Organize them into an Eisenhower Matrix (Urgent/Important) and build a realistic time-blocked schedule.', cat: 'Productivity', mode: 'personal' },
+      ];
+
+      // ==========================================
+      // ROOT SMARTAI APPLICATION COMPONENT
+      // ==========================================
+      function SmartAIApp() {
+        const [currentView, setCurrentView] = useState('dashboard');
+        const [theme, setTheme] = useState('dark');
+        const [activeMode, setActiveMode] = useState('personal');
+        const [personality, setPersonality] = useState('friendly');
+        const [userRole, setUserRole] = useState('user'); // 'user' (Sarah Chen) or 'admin' (Alex Mercer)
+        const [userTier, setUserTier] = useState('pro'); // 'free', 'pro', 'ultra'
+        const [dailyUsage, setDailyUsage] = useState({ used: 42, limit: 250 });
+        const [memories, setMemories] = useState(INITIAL_MEMORIES);
+        const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+        const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+        const [toasts, setToasts] = useState([]);
+
+        // Chat state
+        const [messages, setMessages] = useState([
+          { id: '1', role: 'assistant', content: 'Welcome to **SmartAI**! 🚀\n\nI am your next-generation personal AI super assistant.\n\n- 🎓 **Study Mode**: Deep concept breakdowns & interactive quizzes\n- 💼 **Business Mode**: Executive memos & strategic frameworks\n- 🎨 **Creative Studio**: Viral hooks & copywriting\n- 💻 **Developer Mode**: Clean architecture & code debugging\n- 🎙️ **Voice Assistant**: Natural real-time spoken conversations\n\nHow can I empower your productivity today?' }
+        ]);
+        const [chatInput, setChatInput] = useState('');
+        const [isChatLoading, setIsChatLoading] = useState(false);
+
+        // Workspace tabs
+        const [workspaceTabs, setWorkspaceTabs] = useState([
+          { id: 'tab-1', title: 'Executive Draft', content: '# Q1 2026 Strategy\n- Accelerate autonomous workflow adoption\n- Expand personal memory intelligence\n- Deliver zero-latency multimodal experiences.' },
+          { id: 'tab-2', title: 'Algorithm.ts', content: '// Vector Similarity Search\nfunction cosineSimilarity(a, b) {\n  let dot = 0, normA = 0, normB = 0;\n  for (let i = 0; i < a.length; i++) {\n    dot += a[i] * b[i];\n    normA += a[i] * a[i];\n    normB += b[i] * b[i];\n  }\n  return dot / (Math.sqrt(normA) * Math.sqrt(normB) || 1);\n}' }
+        ]);
+        const [activeTabId, setActiveTabId] = useState('tab-1');
+
+        const showToast = (message, type = 'info') => {
+          const id = Date.now();
+          setToasts((prev) => [...prev, { id, message, type }]);
+          setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 3500);
+        };
+
+        const toggleTheme = () => {
+          setTheme((prev) => {
+            const next = prev === 'dark' ? 'light' : 'dark';
+            document.documentElement.classList.toggle('dark', next === 'dark');
+            return next;
+          });
+        };
+
+        const recordUsage = () => {
+          if (dailyUsage.used >= dailyUsage.limit) {
+            showToast(`Daily request limit reached (${dailyUsage.limit}). Upgrade to Pro or Ultra!`, 'warning');
+            return false;
+          }
+          setDailyUsage((prev) => ({ ...prev, used: prev.used + 1 }));
+          return true;
+        };
+
+        // Voice Speech Output
+        const speakText = (text) => {
+          if (!('speechSynthesis' in window)) {
+            showToast('Speech synthesis not supported in this browser', 'warning');
+            return;
+          }
+          window.speechSynthesis.cancel();
+          const clean = text.replace(/```[\s\S]*?```/g, '').replace(/[#*`_~]/g, '');
+          const utterance = new SpeechSynthesisUtterance(clean);
+          window.speechSynthesis.speak(utterance);
+          showToast('Playing voice audio...', 'info');
+        };
+
+        // Send chat message
+        const handleSendMessage = async (textToSend) => {
+          const prompt = textToSend || chatInput;
+          if (!prompt.trim()) return;
+          if (!recordUsage()) return;
+
+          const userMsg = { id: Date.now().toString(), role: 'user', content: prompt };
+          setMessages((prev) => [...prev, userMsg]);
+          setChatInput('');
+          setIsChatLoading(true);
+
+          try {
+            // First attempt to call the server-side API if backend server is connected
+            const res = await fetch('/api/chat', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                messages: [...messages, userMsg],
+                mode: activeMode,
+                personality: personality,
+                memories: memories.filter((m) => m.isEnabled),
+                stream: false
+              })
+            }).catch(() => null);
+
+            if (res && res.ok) {
+              const data = await res.json();
+              setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: data.text }]);
+            } else {
+              // Intelligent offline simulation mode if opened standalone as local file
+              setTimeout(() => {
+                let reply = `### [SmartAI ${SMART_MODES[activeMode].name}]\n\n`;
+                if (activeMode === 'study') {
+                  reply += `Great question regarding **${prompt}**!\n\nHere is an intuitive 3-step breakdown:\n1. **Core Concept**: It operates by distributing load dynamically across isolated nodes.\n2. **Everyday Analogy**: Think of it like a highway toll system with smart fast-passes.\n3. **Key Takeaway**: High throughput is achieved without locking shared memory buffers.`;
+                } else if (activeMode === 'developer') {
+                  reply += `Here is an idiomatic solution in TypeScript:\n\n\`\`\`typescript\nexport async function handleTask(payload: Record<string, unknown>): Promise<boolean> {\n  try {\n    // Validated payload execution\n    console.log("Processing payload with strict types:", payload);\n    return true;\n  } catch (error) {\n    console.error("Execution failed:", error);\n    return false;\n  }\n}\n\`\`\`\n\n*Time Complexity: O(1), Space Complexity: O(1)*`;
+                } else {
+                  reply += `Thank you for asking! Based on your active SmartAI preferences and personal memory, here is a tailored recommendation:\n\n- **Focus**: High signal, actionable results.\n- **Next Step**: You can export this to your Multi-Tool Workspace or test it directly with our Study Lab.`;
+                }
+                setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: reply }]);
+              }, 800);
+            }
+          } catch (err) {
+            setMessages((prev) => [...prev, { id: (Date.now() + 1).toString(), role: 'assistant', content: 'Connected to SmartAI Neural Engine.' }]);
+          } finally {
+            setIsChatLoading(false);
+          }
+        };
+
+        // One-Click Standalone HTML Downloader
+        const handleDownloadSingleFile = () => {
+          const htmlContent = document.documentElement.outerHTML;
+          const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'SmartAI_Standalone_SingleFile.html';
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast('SmartAI complete single-file index.html downloaded!', 'success');
+        };
+
+        const activeModeConf = SMART_MODES[activeMode];
+        const activeTab = workspaceTabs.find((t) => t.id === activeTabId) || workspaceTabs[0];
+
+        return (
+          <div className="min-h-screen flex flex-col bg-[#070913] text-slate-100">
+            {/* Top Navigation Bar */}
+            <header className="sticky top-0 z-30 w-full h-16 border-b border-white/5 bg-[#070913]/90 backdrop-blur-xl px-4 lg:px-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)} className="p-2 rounded-xl text-slate-400 hover:text-white lg:hidden">
+                  <Icon name="LayoutDashboard" className="w-5 h-5" />
+                </button>
+                <div onClick={() => setCurrentView('dashboard')} className="cursor-pointer">
+                  <Logo size="md" />
+                </div>
+              </div>
+
+              {/* Center Smart Mode Selector */}
+              <div className="hidden md:flex items-center gap-2">
+                <div className="flex items-center p-1 rounded-full bg-slate-900/90 border border-slate-800 text-xs font-semibold">
+                  {Object.keys(SMART_MODES).map((k) => {
+                    const m = SMART_MODES[k];
+                    const isSel = activeMode === k;
+                    return (
+                      <button
+                        key={k}
+                        onClick={() => {
+                          setActiveMode(k);
+                          showToast(`Mode switched to: ${m.name}`, 'info');
+                        }}
+                        className={`px-3 py-1.5 rounded-full transition-all ${
+                          isSel ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-white shadow-md' : 'text-slate-400 hover:text-white'
+                        }`}
+                      >
+                        {m.name.split(' ')[0]}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Right Bar */}
+              <div className="flex items-center gap-3">
+                {/* Single-file index.html download button */}
+                <button
+                  onClick={handleDownloadSingleFile}
+                  title="Download complete single-file index.html"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-cyan-300 border border-cyan-500/30 transition-all hover:scale-[1.02]"
+                >
+                  <Icon name="Download" className="w-3.5 h-3.5" />
+                  <span>Download index.html</span>
+                </button>
+
+                {/* Quota indicator */}
+                <div onClick={() => setCurrentView('pricing')} className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-slate-800 text-xs cursor-pointer">
+                  <Icon name="Zap" className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="font-bold uppercase text-[10px] text-indigo-300">{userTier}</span>
+                  <span className="text-slate-400 text-[11px]">{dailyUsage.used}/{dailyUsage.limit}</span>
+                </div>
+
+                {/* Theme toggle */}
+                <button onClick={toggleTheme} className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/5">
+                  <Icon name={theme === 'dark' ? 'Sun' : 'Moon'} className="w-4 h-4" />
+                </button>
+
+                {/* User avatar & role switcher */}
+                <div
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="flex items-center gap-2 p-1 pl-2 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-800 cursor-pointer"
+                >
+                  <span className="text-xs font-semibold text-white hidden md:inline">
+                    {userRole === 'admin' ? 'Alex Mercer (Admin)' : 'Sarah Chen'}
+                  </span>
+                  <img
+                    src={userRole === 'admin' ? "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100" : "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100"}
+                    className="w-7 h-7 rounded-full object-cover ring-1 ring-cyan-400/50"
+                  />
+                </div>
+              </div>
+            </header>
+
+            {/* Layout Body */}
+            <div className="flex-1 flex max-w-[1720px] w-full mx-auto">
+              {/* Sidebar */}
+              <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-[#0a0d1d]/95 backdrop-blur-2xl border-r border-white/5 p-4 flex flex-col justify-between transition-transform duration-200 lg:static lg:translate-x-0 ${
+                mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+              }`}>
+                <div className="space-y-6 overflow-y-auto">
+                  <div className="lg:hidden flex items-center justify-between pb-2 border-b border-white/5">
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Navigation</span>
+                    <button onClick={() => setMobileSidebarOpen(false)} className="text-slate-400">✕</button>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setMessages([]);
+                      setCurrentView('chat');
+                      setMobileSidebarOpen(false);
+                      showToast('New chat session started', 'success');
+                    }}
+                    className="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-cyan-500 via-indigo-600 to-fuchsia-600 hover:from-cyan-400 hover:to-fuchsia-500 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2"
+                  >
+                    <Icon name="Plus" className="w-4 h-4" />
+                    <span>New Chat Session</span>
+                  </button>
+
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3">Intelligence</div>
+                    {[
+                      { id: 'dashboard', label: 'Smart Dashboard', icon: 'LayoutDashboard' },
+                      { id: 'chat', label: 'AI Chat Stream', icon: 'MessageSquare' },
+                      { id: 'voice', label: 'Voice Assistant', icon: 'Mic' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => { setCurrentView(item.id); setMobileSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                          currentView === item.id ? 'bg-indigo-600/30 text-white border border-indigo-500/40' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                        }`}
+                      >
+                        <Icon name={item.icon} className="w-4 h-4 text-cyan-400" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3">Productivity Studios</div>
+                    {[
+                      { id: 'writer', label: 'AI Writing Studio', icon: 'PenTool' },
+                      { id: 'translator', label: 'Smart Translator', icon: 'Languages' },
+                      { id: 'coding', label: 'Coding Assistant', icon: 'Code' },
+                      { id: 'study', label: 'Study & Quiz Lab', icon: 'GraduationCap' },
+                      { id: 'document', label: 'Document Assistant', icon: 'FileText' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => { setCurrentView(item.id); setMobileSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                          currentView === item.id ? 'bg-indigo-600/30 text-white border border-indigo-500/40' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                        }`}
+                      >
+                        <Icon name={item.icon} className="w-4 h-4 text-indigo-400" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500 px-3">Ecosystem</div>
+                    {[
+                      { id: 'workspace', label: 'Multi-Tool Workspace', icon: 'Layers' },
+                      { id: 'memory', label: 'Personal Memory', icon: 'BrainCircuit' },
+                      { id: 'prompts', label: 'Prompt Library', icon: 'BookOpen' },
+                      { id: 'pricing', label: 'Plans & Pricing', icon: 'CreditCard' },
+                      { id: 'admin', label: 'Admin Console', icon: 'ShieldCheck' },
+                      { id: 'settings', label: 'Settings', icon: 'Settings' },
+                    ].map((item) => (
+                      <button
+                        key={item.id}
+                        onClick={() => { setCurrentView(item.id); setMobileSidebarOpen(false); }}
+                        className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all ${
+                          currentView === item.id ? 'bg-indigo-600/30 text-white border border-indigo-500/40' : 'text-slate-400 hover:text-slate-200 hover:bg-white/5'
+                        }`}
+                      >
+                        <Icon name={item.icon} className="w-4 h-4 text-fuchsia-400" />
+                        <span>{item.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-white/5 text-[10px] text-slate-500">
+                  <span>SmartAI v2.5 · Single-File Edition</span>
+                </div>
+              </aside>
+
+              {/* Main Content Area */}
+              <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto pb-24 lg:pb-8">
+                {/* 1. DASHBOARD VIEW */}
+                {currentView === 'dashboard' && (
+                  <div className="max-w-6xl mx-auto space-y-6">
+                    <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 glass-panel border border-white/10 shadow-2xl bg-gradient-to-br from-slate-900/90 via-indigo-950/40 to-slate-900/90">
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="space-y-2">
+                          <span className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+                            Neural Pipeline Active · {activeModeConf.name}
+                          </span>
+                          <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
+                            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-400">{userRole === 'admin' ? 'Alex Mercer' : 'Sarah Chen'}</span>
+                          </h1>
+                          <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
+                            One AI. Endless Possibilities. Move between writing, coding, voice interactions, and study labs without friction.
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => setCurrentView('chat')}
+                            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-xs text-white shadow-lg shadow-indigo-600/30"
+                          >
+                            Open AI Chat
+                          </button>
+                          <button
+                            onClick={() => setCurrentView('voice')}
+                            className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-white border border-slate-700"
+                          >
+                            Voice Mode
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Grid */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      <div className="p-4 rounded-2xl glass-panel border border-white/5">
+                        <div className="text-xs text-slate-400">Daily Requests</div>
+                        <div className="text-2xl font-bold text-white mt-1">{dailyUsage.used} <span className="text-xs font-normal text-slate-500">/ {dailyUsage.limit}</span></div>
+                        <div className="text-[10px] text-emerald-400 mt-1">Remaining: {dailyUsage.limit - dailyUsage.used}</div>
+                      </div>
+                      <div className="p-4 rounded-2xl glass-panel border border-white/5">
+                        <div className="text-xs text-slate-400">Tokens Processed</div>
+                        <div className="text-2xl font-bold text-white mt-1">128.4k</div>
+                        <div className="text-[10px] text-indigo-300 mt-1">Gemini 3.8 Flash</div>
+                      </div>
+                      <div className="p-4 rounded-2xl glass-panel border border-white/5">
+                        <div className="text-xs text-slate-400">Personal Memories</div>
+                        <div className="text-2xl font-bold text-white mt-1">{memories.length} facts</div>
+                        <div className="text-[10px] text-cyan-400 mt-1 cursor-pointer" onClick={() => setCurrentView('memory')}>Manage memories →</div>
+                      </div>
+                      <div className="p-4 rounded-2xl glass-panel border border-white/5">
+                        <div className="text-xs text-slate-400">Active Tier</div>
+                        <div className="text-2xl font-bold text-amber-300 uppercase mt-1">{userTier}</div>
+                        <div className="text-[10px] text-indigo-300 mt-1 cursor-pointer" onClick={() => setCurrentView('pricing')}>Upgrade plan →</div>
+                      </div>
+                    </div>
+
+                    {/* Quick Launch Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {[
+                        { title: 'AI Writing Studio', desc: 'Craft executive emails, articles and sales copy.', view: 'writer', icon: 'PenTool' },
+                        { title: 'Coding Assistant', desc: 'Generate, debug and explain TypeScript & Python.', view: 'coding', icon: 'Code' },
+                        { title: 'Study & Quiz Lab', desc: 'Interactive 5-question quizzes and 3D flashcards.', view: 'study', icon: 'GraduationCap' },
+                      ].map((card, i) => (
+                        <div
+                          key={i}
+                          onClick={() => setCurrentView(card.view)}
+                          className="p-5 rounded-2xl glass-panel border border-white/5 hover:border-cyan-500/40 cursor-pointer transition-all hover:-translate-y-1"
+                        >
+                          <Icon name={card.icon} className="w-6 h-6 text-cyan-400 mb-2" />
+                          <h3 className="text-sm font-bold text-white">{card.title}</h3>
+                          <p className="text-xs text-slate-400 mt-1">{card.desc}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 2. CHAT VIEW */}
+                {currentView === 'chat' && (
+                  <div className="max-w-4xl mx-auto rounded-3xl glass-panel border border-white/5 flex flex-col h-[calc(100vh-8rem)]">
+                    <div className="p-4 border-b border-white/5 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse" />
+                        <span className="font-bold text-sm text-white">SmartAI Streaming Session</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${activeModeConf.badge}`}>{activeModeConf.name}</span>
+                      </div>
+                      <button onClick={() => setMessages([])} className="text-xs text-slate-400 hover:text-white">Clear</button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
+                      {messages.map((m) => (
+                        <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`p-4 rounded-2xl max-w-2xl text-xs sm:text-sm leading-relaxed ${
+                            m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-900/90 text-slate-200 border border-white/5'
+                          }`}>
+                            <div className="whitespace-pre-wrap">{m.content}</div>
+                            {m.role === 'assistant' && (
+                              <div className="mt-2 pt-2 border-t border-white/5 flex gap-3 text-[11px] text-slate-400">
+                                <button onClick={() => { navigator.clipboard.writeText(m.content); showToast('Copied to clipboard', 'info'); }} className="hover:text-white">Copy</button>
+                                <button onClick={() => speakText(m.content)} className="hover:text-cyan-400">Listen</button>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      {isChatLoading && (
+                        <div className="flex items-center gap-2 text-cyan-400 text-xs">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+                          <span>SmartAI is thinking...</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-3 border-t border-white/5 bg-slate-950/60">
+                      <div className="flex items-center gap-2 rounded-2xl bg-slate-900 border border-slate-700/80 p-2">
+                        <input
+                          type="text"
+                          value={chatInput}
+                          onChange={(e) => setChatInput(e.target.value)}
+                          onKeyDown={(e) => { if (e.key === 'Enter') handleSendMessage(); }}
+                          placeholder={`Ask SmartAI in ${activeModeConf.name}...`}
+                          className="flex-1 bg-transparent text-xs text-white placeholder-slate-500 focus:outline-none px-2"
+                        />
+                        <button
+                          onClick={() => handleSendMessage()}
+                          disabled={!chatInput.trim() || isChatLoading}
+                          className="p-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white disabled:opacity-30"
+                        >
+                          <Icon name="Send" className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. VOICE ASSISTANT VIEW */}
+                {currentView === 'voice' && (
+                  <div className="max-w-2xl mx-auto rounded-3xl glass-panel border border-white/5 p-8 text-center space-y-6">
+                    <h2 className="text-2xl font-bold text-white">Voice Super Assistant</h2>
+                    <p className="text-xs text-slate-400">Tap the glowing intelligence orb to speak naturally.</p>
+                    
+                    <div
+                      onClick={() => {
+                        showToast('Voice capture active! Speak your request.', 'info');
+                        handleSendMessage('Summarize my daily top 3 priorities.');
+                        setCurrentView('chat');
+                      }}
+                      className="cursor-pointer w-44 h-44 rounded-full mx-auto p-3 bg-gradient-to-tr from-cyan-500 via-indigo-600 to-fuchsia-600 shadow-[0_0_50px_rgba(56,189,248,0.4)] flex items-center justify-center hover:scale-105 transition-transform"
+                    >
+                      <div className="w-full h-full rounded-full bg-[#080d22] flex flex-col items-center justify-center">
+                        <Icon name="Mic" className="w-10 h-10 text-cyan-400 animate-pulse" />
+                        <span className="text-[11px] font-bold text-slate-300 mt-2">Tap to Speak</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 4. WRITING STUDIO VIEW */}
+                {currentView === 'writer' && (
+                  <div className="max-w-5xl mx-auto space-y-6">
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 flex justify-between items-center">
+                      <div>
+                        <h2 className="text-xl font-bold text-white">AI Writing Studio</h2>
+                        <p className="text-xs text-slate-400">Generate executive emails, articles, and sales copy.</p>
+                      </div>
+                    </div>
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 space-y-4">
+                      <textarea
+                        id="writer-prompt"
+                        defaultValue="Announce the general availability of SmartAI v2.5 to our VIP enterprise waitlist."
+                        rows={4}
+                        className="w-full p-3 rounded-2xl bg-slate-950 border border-slate-700 text-xs text-white"
+                      />
+                      <button
+                        onClick={() => {
+                          const p = document.getElementById('writer-prompt').value;
+                          handleSendMessage(`[Writing Studio Task]: ${p}`);
+                          setCurrentView('chat');
+                        }}
+                        className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 font-bold text-xs text-white"
+                      >
+                        Generate in AI Chat
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 5. STUDY & QUIZ LAB VIEW */}
+                {currentView === 'study' && (
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5">
+                      <h2 className="text-xl font-bold text-white">Study & Interactive Quiz Lab</h2>
+                      <p className="text-xs text-slate-400">Knowledge assessment with instant scoring & confetti.</p>
+                    </div>
+
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 space-y-4">
+                      <h3 className="text-sm font-bold text-white">Sample Question: What is the primary role of chlorophyll?</h3>
+                      <div className="grid grid-cols-1 gap-2">
+                        {[
+                          { text: 'A) Absorbs light photons and excites electrons', correct: true },
+                          { text: 'B) Synthesizes glucose directly from carbon dioxide', correct: false },
+                          { text: 'C) Converts water into nitrogen gas', correct: false },
+                        ].map((opt, i) => (
+                          <button
+                            key={i}
+                            onClick={() => {
+                              if (opt.correct) {
+                                if (window.confetti) window.confetti({ particleCount: 70, spread: 60 });
+                                showToast('Correct! Chlorophyll absorbs blue/red light wavelengths.', 'success');
+                              } else {
+                                showToast('Incorrect. Try again!', 'warning');
+                              }
+                            }}
+                            className="p-3 rounded-xl bg-slate-900 border border-slate-700 hover:border-emerald-400 text-left text-xs text-slate-200 transition-colors"
+                          >
+                            {opt.text}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 6. CODING ASSISTANT VIEW */}
+                {currentView === 'coding' && (
+                  <div className="max-w-5xl mx-auto space-y-6">
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5">
+                      <h2 className="text-xl font-bold text-white">Coding Assistant & Debugger</h2>
+                      <p className="text-xs text-slate-400">Generate, debug, and optimize TypeScript and Python code.</p>
+                    </div>
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 space-y-4">
+                      <textarea
+                        id="code-prompt"
+                        defaultValue="Write an asynchronous token-bucket rate limiter class in TypeScript with tests."
+                        rows={4}
+                        className="w-full p-3 rounded-2xl bg-slate-950 border border-slate-700 text-xs text-cyan-200 font-mono"
+                      />
+                      <button
+                        onClick={() => {
+                          const p = document.getElementById('code-prompt').value;
+                          handleSendMessage(`[Coding Assistant Task]: ${p}`);
+                          setCurrentView('chat');
+                        }}
+                        className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-xs text-white"
+                      >
+                        Execute in Code Stream
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* 7. MULTI-TOOL WORKSPACE */}
+                {currentView === 'workspace' && (
+                  <div className="max-w-6xl mx-auto space-y-4">
+                    <div className="flex items-center gap-2">
+                      {workspaceTabs.map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTabId(tab.id)}
+                          className={`px-4 py-2 rounded-2xl text-xs font-semibold ${
+                            activeTabId === tab.id ? 'bg-indigo-600 text-white' : 'glass-panel text-slate-400'
+                          }`}
+                        >
+                          {tab.title}
+                        </button>
+                      ))}
+                    </div>
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5">
+                      <textarea
+                        value={activeTab.content}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setWorkspaceTabs((prev) => prev.map((t) => t.id === activeTabId ? { ...t, content: val } : t));
+                        }}
+                        rows={16}
+                        className="w-full bg-[#050816] p-4 rounded-2xl border border-slate-800 text-xs text-slate-200 font-mono focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* 8. PERSONAL MEMORY VIEW */}
+                {currentView === 'memory' && (
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 flex justify-between items-center">
+                      <div>
+                        <h2 className="text-xl font-bold text-white">Smart Personal Memory</h2>
+                        <p className="text-xs text-slate-400">Explicitly approved context injected into all answers.</p>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      {memories.map((m) => (
+                        <div key={m.id} className="p-4 rounded-2xl glass-panel border border-white/5 flex items-center justify-between">
+                          <span className="text-xs text-slate-200 font-medium">"{m.content}"</span>
+                          <button
+                            onClick={() => {
+                              setMemories((prev) => prev.filter((item) => item.id !== m.id));
+                              showToast('Memory removed', 'info');
+                            }}
+                            className="text-xs text-rose-400 hover:underline"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 9. PRICING & UPGRADE VIEW */}
+                {currentView === 'pricing' && (
+                  <div className="max-w-5xl mx-auto space-y-6">
+                    <div className="text-center space-y-2">
+                      <h2 className="text-3xl font-extrabold text-white">SmartAI Subscriptions</h2>
+                      <p className="text-xs text-slate-400">Transparent daily usage tiers with zero hidden rate-limiting.</p>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                      {[
+                        { tier: 'free', price: '$0', limit: '25 requests/day', features: ['Standard AI Chat', 'Basic Writing Tools'] },
+                        { tier: 'pro', price: '$19/mo', limit: '250 requests/day', features: ['Voice Assistant', 'Multi-Tool Workspace', 'Smart Memory Sync'], active: userTier === 'pro' },
+                        { tier: 'ultra', price: '$49/mo', limit: '1,000 requests/day', features: ['Document Intelligence', 'Priority Processing', 'VIP Concierge'], active: userTier === 'ultra' },
+                      ].map((t) => (
+                        <div key={t.tier} className="p-6 rounded-3xl glass-panel border border-white/10 space-y-4">
+                          <h3 className="text-lg font-bold text-white uppercase">{t.tier}</h3>
+                          <div className="text-3xl font-extrabold text-cyan-300">{t.price}</div>
+                          <div className="text-xs text-slate-400">{t.limit}</div>
+                          <ul className="text-xs space-y-2 text-slate-300">
+                            {t.features.map((f, i) => <li key={i}>✓ {f}</li>)}
+                          </ul>
+                          <button
+                            onClick={() => {
+                              setUserTier(t.tier);
+                              setDailyUsage({ used: 0, limit: t.tier === 'ultra' ? 1000 : t.tier === 'pro' ? 250 : 25 });
+                              if (window.confetti) window.confetti();
+                              showToast(`Subscribed to SmartAI ${t.tier.toUpperCase()}!`, 'success');
+                            }}
+                            className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 font-bold text-xs text-white"
+                          >
+                            {userTier === t.tier ? 'Current Plan' : 'Select Plan'}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* 10. ADMIN DASHBOARD VIEW */}
+                {currentView === 'admin' && (
+                  <div className="max-w-5xl mx-auto space-y-6">
+                    <div className="p-6 rounded-3xl glass-panel border border-amber-500/30">
+                      <h2 className="text-xl font-bold text-white">Administrator Control Panel</h2>
+                      <p className="text-xs text-slate-400">Total users: 1,420 · MRR: $24,850 · Pipeline Health: 99.92%</p>
+                    </div>
+                    <div className="p-6 rounded-3xl glass-panel border border-white/5 space-y-2 text-xs">
+                      <div className="flex justify-between py-2 border-b border-white/5">
+                        <span className="font-semibold text-white">Sarah Chen</span>
+                        <span className="text-cyan-300">PRO TIER · 42/250 used</span>
+                      </div>
+                      <div className="flex justify-between py-2 border-b border-white/5">
+                        <span className="font-semibold text-white">David Kim</span>
+                        <span className="text-amber-300">ULTRA TIER · 492/1000 used</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* 11. SETTINGS VIEW */}
+                {currentView === 'settings' && (
+                  <div className="max-w-3xl mx-auto rounded-3xl glass-panel border border-white/5 p-6 space-y-6">
+                    <h2 className="text-xl font-bold text-white">Settings</h2>
+                    <div className="space-y-4 text-xs">
+                      <div>
+                        <label className="text-slate-400 block mb-1">AI Personality</label>
+                        <select
+                          value={personality}
+                          onChange={(e) => { setPersonality(e.target.value); showToast(`Personality updated: ${e.target.value}`, 'success'); }}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-white"
+                        >
+                          <option value="friendly">Friendly & Approachable</option>
+                          <option value="professional">Professional & Executive</option>
+                          <option value="concise">Ultra-Concise & High-Signal</option>
+                          <option value="creative">Creative & Imaginative</option>
+                        </select>
+                      </div>
+
+                      <div className="pt-4 border-t border-white/5 flex gap-3">
+                        <button onClick={handleDownloadSingleFile} className="px-4 py-2 rounded-xl bg-cyan-600 font-bold text-white">
+                          Export Single-File index.html
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </main>
+            </div>
+
+            {/* User Switcher Modal */}
+            {isAuthModalOpen && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div onClick={() => setIsAuthModalOpen(false)} className="fixed inset-0 bg-black/70 backdrop-blur-sm" />
+                <div className="relative p-6 rounded-3xl glass-panel bg-[#090d20] border border-white/10 w-full max-w-sm space-y-4">
+                  <h3 className="text-base font-bold text-white">Switch Profile Role</h3>
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => { setUserRole('user'); setIsAuthModalOpen(false); showToast('Switched to Sarah Chen (Pro)', 'success'); }}
+                      className="w-full p-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-left text-xs font-semibold text-white border border-slate-700"
+                    >
+                      Sarah Chen (Pro User)
+                    </button>
+                    <button
+                      onClick={() => { setUserRole('admin'); setIsAuthModalOpen(false); showToast('Switched to Alex Mercer (Admin)', 'success'); }}
+                      className="w-full p-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-left text-xs font-semibold text-white border border-slate-700"
+                    >
+                      Alex Mercer (System Administrator)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Notification Toasts */}
+            <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none">
+              {toasts.map((t) => (
+                <div key={t.id} className="p-3.5 rounded-2xl glass-panel border border-cyan-500/40 text-xs text-white shadow-2xl pointer-events-auto">
+                  {t.message}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
+
+      // Mount to root DOM
+      const rootElement = document.getElementById('root');
+      if (rootElement) {
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(<SmartAIApp />);
+      }
+    </script>
+
+    <!-- Fallback Vite dev entry point so full-stack compilation remains 100% active -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
